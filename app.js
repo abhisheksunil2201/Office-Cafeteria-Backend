@@ -8,7 +8,21 @@ const cors = require('cors');
 const app = express();
 
 // middleware
-app.use(cors());
+// app.use(cors({
+//   credentials: true,
+// }));
+const whitelist = ['http://localhost:3000'];
+const corsOptions = {
+  credentials: true, // This is important.
+  origin: (origin, callback) => {
+    if (whitelist.includes(origin))
+      return callback(null, true)
+
+    callback(new Error('Not allowed by CORS'));
+  }
+}
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -19,6 +33,5 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCr
   .catch((err) => console.log(err));
 
 // routes
-app.get('*', checkUser);
 app.use(authRoutes);
 
